@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Chart Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+</head>
+<body>
+    <h1>Upload a CSV File</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv" required>
+        <button type="submit">Upload</button>
+    </form>
+    {% if charts %}
+    <h2>Charts</h2>
+    <div class="chart-grid">
+        {% for name, chart in charts.items() %}
+        <div class="chart-card {% if name == 'jitter_by_connection' %}full-width{% endif %}">
+            <h3>{{ name|replace('__','')|capitalize }}</h3>
+            <div class="chart-content">
+                {{ chart | safe }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No charts to display yet</p>
+    {% endif %}
+
+
+</body>
+</html>
