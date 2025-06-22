@@ -1,5 +1,7 @@
 import plotly.express as px
 import pandas as pd
+import networkx as nx
+import plotly.graph_objects as go
 from auxiliary import *
 
 
@@ -16,6 +18,7 @@ def protocol_pie_chart(df):
     return fig.to_html(full_html=False) 
 
 def top_sources_chart(df, top_n=10):
+    df_filtered = filter_top_nodes(df,top_n=top_n,column='Source',group_rest = False)
     top_sources = df['Source'].value_counts().head(top_n).reset_index()
     top_sources.columns = ['Source', 'Count']
     top_sources = top_sources.astype({'Count': int})
@@ -24,8 +27,6 @@ def top_sources_chart(df, top_n=10):
     fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     
     return fig.to_html(full_html=False)
-
-import plotly.graph_objects as go
 
 def jitter_by_connection_chart(df, top_n=10):
     if 'Time' not in df.columns or 'Source' not in df.columns or 'Destination' not in df.columns:
@@ -89,5 +90,65 @@ def jitter_by_connection_chart(df, top_n=10):
     )
 
     return fig.to_html(full_html=False, include_plotlyjs=False, config={'responsive': True})
+def mac_connection_graph(df,top_n=10):
+    top_nodes = get_top_nodes(df, top_n)
+    df_filtered = filter_by_top_nodes(df, top_nodes, keep_others=False)
+
+    df = df[(df['Source'] != 'Other') | (df['Destination'] != 'Other')]
+    G = nx.from_pandas_edgelist(df_filtered, source="Source", target="Destination", create_using=nx.DiGraph())
+
+    pos = nx.spring_layout(G, seed=42)
+
+    edge_x = []
+    edge_y = []
+    for src, dst in G.edges():
+        x0, y0 = pos[src]
+        x1, y1 = pos[dst]
+        edge_x.extend([x0, x1, None])
+        edge_y.extend([y0, y1, None])
+
+    edge_trace = go.Scatter(
+        x=edge_x, y=edge_y,
+        line=dict(width=1, color='#888'),
+        hoverinfo='none',
+        mode='lines'
+    )
+
+    node_x = []
+    node_y = []
+    node_text = []
+
+    for node in G.nodes():
+        x, y = pos[node]
+        node_x.append(x)
+        node_y.append(y)
+        node_text.append(node)
+
+    node_trace = go.Scatter(
+        x=node_x, y=node_y,
+        mode='markers+text',
+        text=node_text,
+        textposition='top center',
+        hoverinfo='text',
+        marker=dict(
+            showscale=False,
+            color='lightblue',
+            size=10,
+            line_width=2
+        )
+    )
+    fig = go.Figure(data=[edge_trace, node_trace],
+                    layout=go.Layout(
+                        title=dict(text='MAC Address Connection Graph', font=dict(size=16)),
+                        showlegend=False,
+                        hovermode='closest',
+                        margin=dict(b=20, l=5, r=5, t=40),
+                        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)'
+                    ))
+
+    return fig.to_html(full_html=False)
 
 

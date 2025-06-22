@@ -21,6 +21,7 @@ def index():
             charts['protocol_pie'] = protocol_pie_chart(df)
             charts['top_sources_bar'] = top_sources_chart(df)
             charts['jitter_by_connection'] = jitter_by_connection_chart(df)
+            charts['mac_addresses'] = mac_connection_graph(df)
             # Basic chart: first 2 numeric columns
             #Line chart
     return render_template('index.html', charts=charts)
