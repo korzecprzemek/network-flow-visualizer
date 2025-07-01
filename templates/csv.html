@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Podgląd CSV</title>
+</head>
+<body>
+    <h1>Podgląd pliku CSV</h1>
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv">
+        <button type="submit">Wyślij</button>
+    </form>
+
+    <form method="get">
+        <label>Filtruj po kolumnie:</label>
+        <select name="filter_column">
+            <option value="">-- wybierz --</option>
+            {% for col in columns %}
+                <option value="{{ col }}" {% if col == filter_column %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="filter_value" value="{{ filter_value }}" placeholder="Wartość">
+        <button type="submit">Filtruj</button>
+        <input type="hidden" name="start" value="0">
+    </form>
+
+    {{ table_html|safe }}
+    <div>
+        {% if prev_start < start %}
+            <a href="{{ url_for('show_csv', start=prev_start, filter_column=filter_column, filter_value=filter_value) }}">Poprzednie 100</a>
+        {% endif %}
+        {% if next_start < total_rows %}
+            <a href="{{ url_for('show_csv', start=next_start, filter_column=filter_column, filter_value=filter_value) }}">Następne 100</a>
+        {% endif %}
+    </div>
+    <p><a href="{{ url_for('home') }}">Powrót</a></p>
+</body>
+</html>

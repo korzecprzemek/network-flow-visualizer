@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Strona główna</title>
+</head>
+<body>
+    <h1>Witaj!</h1>
+    <form method="POST" action="{{ url_for('analyze') }}" enctype="multipart/form-data">
+        <label>Wgraj plik CSV:</label>
+        <input type="file" name="file" accept=".csv" required>
+        <button type="submit">Wyślij do analizy</button>
+    </form>
+    <p>Lub wybierz tryb:</p>
+    <ul>
+        <li><a href="{{ url_for('analyze') }}">Analiza pliku CSV</a></li>
+        <li><a href="{{ url_for('show_csv') }}">Wyświetl sam plik CSV</a></li>
+    </ul>
+</body>
+</html>
